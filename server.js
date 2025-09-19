@@ -1,15 +1,24 @@
-const express = require("express");
-const path = require("path");
+const express = require('express');
+const http = require('http');
+const net = require('net');
+const cors = require('cors');
+const fetch = require('node-fetch');
+const { Server } = require('socket.io');
+const { startBusSimulation } = require('./sim/busSimulator');
+const { stops, lines, generateUpcomingTimes } = require('./data/stops');
+const path = require('path'); // <-- import path
+
+// 1️⃣ Initialize app FIRST
 const app = express();
 
-// Serve frontend from client folder
-app.use(express.static(path.join(__dirname, "client")));
+// 2️⃣ Serve frontend AFTER app is initialized
+app.use(express.static(path.join(__dirname, '../client')));
 
-// Optional: catch-all for SPA routing
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "client", "index.html"));
+// 3️⃣ Catch-all route to serve index.html for unknown routes
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(__dirname, '../client/index.html'));
 });
 
-// Server port
-const PORT = process.env.PORT || 619;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// 4️⃣ Then all other middlewares / APIs
+app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:620' }));
+app.use(express.json());
