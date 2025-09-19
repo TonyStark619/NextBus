@@ -8,7 +8,7 @@
 ### 1. Render Configuration
 - **Build Command**: `npm run install:all && npm run build`
 - **Start Command**: `npm start`
-- **Node Version**: 18.x
+- **Node Version**: 18.x or 20.x
 
 ### 2. Environment Variables
 ```
@@ -36,3 +36,4 @@ CLIENT_ORIGIN=*
 - If features don't work: Check browser console for errors
 
 **The deployment should now work without getting stuck! 🎉**
+
