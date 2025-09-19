@@ -1,4 +1,14 @@
 const express = require('express');
+const path = require('path');
+
+// Serve frontend files
+app.use(express.static(path.join(__dirname, '../client')));
+
+// Serve index.html for any unknown route
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(__dirname, '../client/index.html'));
+});
+
 const http = require('http');
 const net = require('net');
 const cors = require('cors');
