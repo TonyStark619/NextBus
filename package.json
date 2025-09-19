@@ -5,12 +5,8 @@
   "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",
-    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
-    "server:dev": "cd server && npm run dev",
-    "client:dev": "cd client && npm run dev",
     "build": "cd client && npm run build",
-    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
-    "postinstall": "npm run install:all"
+    "install:all": "cd server && npm install && cd ../client && npm install"
   },
   "keywords": [
     "public-transport",
@@ -27,9 +23,7 @@
     "node": ">=16.0.0",
     "npm": ">=8.0.0"
   },
-  "dependencies": {
-    "concurrently": "^8.2.2"
-  },
+  "dependencies": {},
   "devDependencies": {},
   "repository": {
     "type": "git",
