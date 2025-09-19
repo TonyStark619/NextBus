@@ -10,6 +10,8 @@
 - **Start Command**: `npm start`
 - **Node Version**: 18.x or 20.x
 
+**Note**: All server dependencies are now in the root package.json, so no separate server install needed.
+
 ### 2. Environment Variables
 ```
 NODE_ENV=production

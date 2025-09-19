@@ -4,9 +4,9 @@
   "description": "Real-time public transport tracking for small cities",
   "main": "server/index.js",
   "scripts": {
-    "start": "cd server && npm start",
+    "start": "node server/index.js",
     "build": "cd client && npm run build",
-    "install:all": "cd server && npm install && cd ../client && npm install"
+    "install:all": "cd client && npm install"
   },
   "keywords": [
     "public-transport",
@@ -23,7 +23,13 @@
     "node": ">=16.0.0",
     "npm": ">=8.0.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "node-fetch": "^2.7.0",
+    "socket.io": "^4.8.1",
+    "ws": "^8.18.3"
+  },
   "devDependencies": {},
   "repository": {
     "type": "git",
