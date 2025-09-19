@@ -1,4 +1,4 @@
-const SERVER_ORIGIN = localStorage.getItem('server_origin') || (import.meta.env && import.meta.env.SERVER_ORIGIN) || window.location.origin;
+const SERVER_ORIGIN = localStorage.getItem('server_origin') || window.location.origin;
 
 const yearEl = document.getElementById('year');
 if (yearEl) yearEl.textContent = String(new Date().getFullYear());

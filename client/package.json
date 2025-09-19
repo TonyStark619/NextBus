@@ -5,7 +5,7 @@
   
   "scripts": {
     "dev": "parcel index.html --port 620",
-    "build": "parcel build index.html map.html settings.html features.html download.html contact.html privacy.html terms.html"
+    "build": "parcel build index.html map.html settings.html features.html download.html contact.html privacy.html terms.html chatbot.html"
   },
   "keywords": [],
   "author": "",

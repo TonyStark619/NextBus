@@ -153,7 +153,20 @@ async function bindServer(startPort) {
 // ========================
 // Catch-all route for frontend routing
 // ========================
-app.get('*', (_req, res) => {
+app.use((req, res, next) => {
+  // Skip API routes
+  if (req.path.startsWith('/api/') || 
+      req.path.startsWith('/stops') || 
+      req.path.startsWith('/lines') || 
+      req.path.startsWith('/geocode') || 
+      req.path.startsWith('/reverse') || 
+      req.path.startsWith('/route') || 
+      req.path.startsWith('/health') ||
+      req.path.startsWith('/realtime')) {
+    return next();
+  }
+  
+  // Serve index.html for all other routes (SPA routing)
   res.sendFile(path.join(__dirname, '../client/index.html'));
 });
 

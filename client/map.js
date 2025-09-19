@@ -1,4 +1,4 @@
-const SERVER_ORIGIN = localStorage.getItem('server_origin') || (import.meta.env && import.meta.env.SERVER_ORIGIN) || window.location.origin;
+const SERVER_ORIGIN = localStorage.getItem('server_origin') || window.location.origin;
 
 const urlParams = new URLSearchParams(window.location.search);
 const start = { lat: parseFloat(urlParams.get('s_lat')), lon: parseFloat(urlParams.get('s_lon')), name: urlParams.get('s_name') };
