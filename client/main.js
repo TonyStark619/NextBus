@@ -1,4 +1,4 @@
-const SERVER_ORIGIN = 'https://your-backend-domain.com';
+const SERVER_ORIGIN = localStorage.getItem('server_origin') || (import.meta.env && import.meta.env.SERVER_ORIGIN) || window.location.origin;
 
 const yearEl = document.getElementById('year');
 if (yearEl) yearEl.textContent = String(new Date().getFullYear());
@@ -38,42 +38,63 @@ locateBtn.addEventListener('click', () => {
   if (!navigator.geolocation) return alert("Geolocation not supported");
   locateBtn.disabled = true;
   navigator.geolocation.getCurrentPosition(async (pos) => {
-    const { latitude, longitude } = pos.coords;
-    const res = await fetch(`${SERVER_ORIGIN}/reverse?lat=${latitude}&lon=${longitude}`);
-    const data = await res.json();
-    fromPoint = { lat: latitude, lon: longitude, name: data.displayName || 'My Location' };
-    fromInput.value = fromPoint.name;
+    try {
+      const { latitude, longitude } = pos.coords;
+      console.log('Getting location data for:', latitude, longitude);
+      const res = await fetch(`${SERVER_ORIGIN}/reverse?lat=${latitude}&lon=${longitude}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      fromPoint = { lat: latitude, lon: longitude, name: data.displayName || 'My Location' };
+      fromInput.value = fromPoint.name;
 
-    if (userMarker) userMarker.remove();
-    userMarker = L.marker([latitude, longitude]).addTo(map).bindPopup('You are here');
-    map.setView([latitude, longitude], 15);
+      if (userMarker) userMarker.remove();
+      userMarker = L.marker([latitude, longitude]).addTo(map).bindPopup('You are here');
+      map.setView([latitude, longitude], 15);
+      locateBtn.disabled = false;
+    } catch (error) {
+      console.error('Geolocation error:', error);
+      alert('Failed to get location data. Please try again.');
+      locateBtn.disabled = false;
+    }
+  }, (error) => {
+    console.error('Geolocation error:', error);
+    alert('Failed to get your location. Please check location permissions.');
     locateBtn.disabled = false;
-  }, () => locateBtn.disabled = false, { enableHighAccuracy: true });
+  }, { enableHighAccuracy: true });
 });
 
 // Route button
 routeBtn.addEventListener('click', async (e) => {
   e.preventDefault();
-  if (!fromPoint && fromInput.value.trim()) {
-    const r = await fetch(`${SERVER_ORIGIN}/geocode?q=${encodeURIComponent(fromInput.value.trim())}`);
-    const data = await r.json();
-    if (data[0]) fromPoint = { lat: data[0].lat, lon: data[0].lon, name: data[0].displayName };
-  }
-  if (!toPoint && toInput.value.trim()) {
-    const r = await fetch(`${SERVER_ORIGIN}/geocode?q=${encodeURIComponent(toInput.value.trim())}`);
-    const data = await r.json();
-    if (data[0]) toPoint = { lat: data[0].lat, lon: data[0].lon, name: data[0].displayName };
-  }
-  if (!fromPoint || !toPoint) return alert('Enter both From and Destination');
+  try {
+    if (!fromPoint && fromInput.value.trim()) {
+      console.log('Geocoding from location:', fromInput.value.trim());
+      const r = await fetch(`${SERVER_ORIGIN}/geocode?q=${encodeURIComponent(fromInput.value.trim())}`);
+      if (!r.ok) throw new Error(`Geocoding failed: HTTP ${r.status}`);
+      const data = await r.json();
+      if (data[0]) fromPoint = { lat: data[0].lat, lon: data[0].lon, name: data[0].displayName };
+    }
+    if (!toPoint && toInput.value.trim()) {
+      console.log('Geocoding to location:', toInput.value.trim());
+      const r = await fetch(`${SERVER_ORIGIN}/geocode?q=${encodeURIComponent(toInput.value.trim())}`);
+      if (!r.ok) throw new Error(`Geocoding failed: HTTP ${r.status}`);
+      const data = await r.json();
+      if (data[0]) toPoint = { lat: data[0].lat, lon: data[0].lon, name: data[0].displayName };
+    }
+    if (!fromPoint || !toPoint) return alert('Enter both From and Destination');
 
-  // Navigate to map.html
-  const q = new URLSearchParams({
-    s_lat: fromPoint.lat,
-    s_lon: fromPoint.lon,
-    e_lat: toPoint.lat,
-    e_lon: toPoint.lon,
-    s_name: fromPoint.name,
-    e_name: toPoint.name,
-  }).toString();
-  window.location.href = `map.html?${q}`;
+    // Navigate to map.html
+    const q = new URLSearchParams({
+      s_lat: fromPoint.lat,
+      s_lon: fromPoint.lon,
+      e_lat: toPoint.lat,
+      e_lon: toPoint.lon,
+      s_name: fromPoint.name,
+      e_name: toPoint.name,
+    }).toString();
+    window.location.href = `map.html?${q}`;
+  } catch (error) {
+    console.error('Route planning error:', error);
+    alert('Failed to find locations. Please check your input and try again.');
+  }
 });

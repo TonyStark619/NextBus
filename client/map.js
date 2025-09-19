@@ -1,4 +1,4 @@
-const SERVER_ORIGIN = 'https://your-backend-domain.com';
+const SERVER_ORIGIN = localStorage.getItem('server_origin') || (import.meta.env && import.meta.env.SERVER_ORIGIN) || window.location.origin;
 
 const urlParams = new URLSearchParams(window.location.search);
 const start = { lat: parseFloat(urlParams.get('s_lat')), lon: parseFloat(urlParams.get('s_lon')), name: urlParams.get('s_name') };
@@ -29,8 +29,23 @@ L.marker([end.lat, end.lon]).addTo(map).bindPopup('End: ' + end.name);
 
 // Realtime buses
 const busMarkers = new Map();
+console.log('Connecting to WebSocket:', `${SERVER_ORIGIN}/realtime`);
 const socket = io(`${SERVER_ORIGIN}/realtime`, { transports: ['websocket'] });
+
+socket.on('connect', () => {
+  console.log('WebSocket connected successfully');
+});
+
+socket.on('disconnect', () => {
+  console.log('WebSocket disconnected');
+});
+
+socket.on('connect_error', (error) => {
+  console.error('WebSocket connection error:', error);
+});
+
 socket.on('bus_updates', (updates) => {
+  console.log('Received bus updates:', updates.length, 'buses');
   updates.forEach(u => {
     let marker = busMarkers.get(u.id);
     if (!marker) {

@@ -17,17 +17,12 @@ const path = require('path');
 const app = express();
 
 const PORT = Number(process.env.PORT) || 619;
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || '*'; // Allow all origins if frontend is served from same server
+const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || '*'; // Allow all origins for production
 
 // ========================
 // Serve Frontend
 // ========================
 app.use(express.static(path.join(__dirname, '../client')));
-
-// Catch-all route to serve index.html for unknown routes (frontend routing)
-app.get('*', (_req, res) => {
-  res.sendFile(path.join(__dirname, '../client/index.html'));
-});
 
 // ========================
 // Middlewares
@@ -150,9 +145,16 @@ async function bindServer(startPort) {
       else { console.error('Server error:', err); process.exit(1); }
     });
 
-    server.listen(port, () => console.log(`Server listening on http://localhost:${port}`));
+    server.listen(port, '0.0.0.0', () => console.log(`Server listening on port ${port}`));
   };
   attempt();
 }
+
+// ========================
+// Catch-all route for frontend routing
+// ========================
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(__dirname, '../client/index.html'));
+});
 
 bindServer(PORT);

@@ -1,0 +1,356 @@
+// ChatBot Component - Can be included in any page
+class ChatBot {
+  constructor() {
+    this.container = null;
+    this.toggle = null;
+    this.messages = null;
+    this.input = null;
+    this.sendBtn = null;
+    this.isOpen = false;
+    this.isInitialized = false;
+  }
+  
+  init() {
+    if (this.isInitialized) return;
+    
+    this.createChatBotHTML();
+    this.bindEvents();
+    this.isInitialized = true;
+  }
+  
+  createChatBotHTML() {
+    // Create chatbot HTML structure
+    const chatbotHTML = `
+      <div class="chatbot-toggle" id="chatbotToggle">
+        🤖
+      </div>
+      
+      <div class="chatbot-container" id="chatbotContainer">
+        <div class="chatbot-header">
+          <div class="chatbot-avatar">🤖</div>
+          <div>
+            <div>ChatBot Assistant</div>
+            <div style="font-size: 12px; opacity: 0.8;">NextBus Helper</div>
+          </div>
+        </div>
+        
+        <div class="chatbot-messages" id="chatbotMessages">
+          <div class="message bot">
+            👋 Hi! I'm your NextBus assistant. I can help you with:
+            <br>• Finding bus routes and timings
+            <br>• Location search tips
+            <br>• App navigation help
+            <br>• General questions about public transport
+            <br><br>How can I help you today?
+          </div>
+        </div>
+        
+        <div class="chatbot-input">
+          <input type="text" id="chatbotInput" placeholder="Ask me anything..." />
+          <button id="chatbotSend">➤</button>
+        </div>
+      </div>
+    `;
+    
+    // Add chatbot styles
+    const chatbotStyles = `
+      <style>
+        .chatbot-container {
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          width: 350px;
+          height: 500px;
+          background: var(--card);
+          border: 1px solid #1f2a3a;
+          border-radius: 16px;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+          display: flex;
+          flex-direction: column;
+          z-index: 1000;
+          transform: translateY(100%);
+          transition: transform 0.3s ease;
+        }
+        
+        .chatbot-container.open {
+          transform: translateY(0);
+        }
+        
+        .chatbot-header {
+          background: linear-gradient(135deg, #22c55e, #16a34a);
+          color: #06280e;
+          padding: 12px 16px;
+          border-radius: 16px 16px 0 0;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-weight: 600;
+        }
+        
+        .chatbot-avatar {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: #ffffff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 18px;
+        }
+        
+        .chatbot-messages {
+          flex: 1;
+          padding: 16px;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+        
+        .message {
+          max-width: 80%;
+          padding: 10px 14px;
+          border-radius: 12px;
+          font-size: 14px;
+          line-height: 1.4;
+        }
+        
+        .message.bot {
+          background: #1f2a3a;
+          color: var(--text);
+          align-self: flex-start;
+        }
+        
+        .message.user {
+          background: var(--accent);
+          color: #06280e;
+          align-self: flex-end;
+        }
+        
+        .chatbot-input {
+          padding: 16px;
+          border-top: 1px solid #1f2a3a;
+          display: flex;
+          gap: 8px;
+        }
+        
+        .chatbot-input input {
+          flex: 1;
+          padding: 10px 12px;
+          border: 1px solid #263246;
+          border-radius: 20px;
+          background: #0e1726;
+          color: var(--text);
+          font-size: 14px;
+        }
+        
+        .chatbot-input button {
+          background: var(--accent);
+          color: #06280e;
+          border: none;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          font-size: 16px;
+        }
+        
+        .chatbot-toggle {
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          width: 60px;
+          height: 60px;
+          background: linear-gradient(135deg, #22c55e, #16a34a);
+          border: none;
+          border-radius: 50%;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 24px;
+          box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
+          z-index: 1001;
+          transition: transform 0.2s ease;
+        }
+        
+        .chatbot-toggle:hover {
+          transform: scale(1.1);
+        }
+        
+        .chatbot-toggle.hidden {
+          display: none;
+        }
+        
+        .typing-indicator {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          padding: 10px 14px;
+          background: #1f2a3a;
+          border-radius: 12px;
+          align-self: flex-start;
+          max-width: 80px;
+        }
+        
+        .typing-dot {
+          width: 6px;
+          height: 6px;
+          background: var(--muted);
+          border-radius: 50%;
+          animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(2) {
+          animation-delay: 0.2s;
+        }
+        
+        .typing-dot:nth-child(3) {
+          animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+          0%, 60%, 100% {
+            transform: translateY(0);
+          }
+          30% {
+            transform: translateY(-10px);
+          }
+        }
+      </style>
+    `;
+    
+    // Add styles to head
+    if (!document.getElementById('chatbot-styles')) {
+      const styleElement = document.createElement('div');
+      styleElement.id = 'chatbot-styles';
+      styleElement.innerHTML = chatbotStyles;
+      document.head.appendChild(styleElement);
+    }
+    
+    // Add chatbot HTML to body
+    const chatbotElement = document.createElement('div');
+    chatbotElement.innerHTML = chatbotHTML;
+    document.body.appendChild(chatbotElement);
+    
+    // Get references to elements
+    this.container = document.getElementById('chatbotContainer');
+    this.toggle = document.getElementById('chatbotToggle');
+    this.messages = document.getElementById('chatbotMessages');
+    this.input = document.getElementById('chatbotInput');
+    this.sendBtn = document.getElementById('chatbotSend');
+  }
+  
+  bindEvents() {
+    this.toggle.addEventListener('click', () => this.toggleChat());
+    this.sendBtn.addEventListener('click', () => this.sendMessage());
+    this.input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') this.sendMessage();
+    });
+  }
+  
+  toggleChat() {
+    this.isOpen = !this.isOpen;
+    this.container.classList.toggle('open', this.isOpen);
+    this.toggle.classList.toggle('hidden', this.isOpen);
+    
+    if (this.isOpen) {
+      this.input.focus();
+    }
+  }
+  
+  addMessage(text, isUser = false) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+    messageDiv.textContent = text;
+    this.messages.appendChild(messageDiv);
+    this.messages.scrollTop = this.messages.scrollHeight;
+  }
+  
+  showTyping() {
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'typing-indicator';
+    typingDiv.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+    this.messages.appendChild(typingDiv);
+    this.messages.scrollTop = this.messages.scrollHeight;
+    return typingDiv;
+  }
+  
+  hideTyping(typingDiv) {
+    if (typingDiv && typingDiv.parentNode) {
+      typingDiv.parentNode.removeChild(typingDiv);
+    }
+  }
+  
+  async sendMessage() {
+    const message = this.input.value.trim();
+    if (!message) return;
+    
+    this.input.value = '';
+    this.addMessage(message, true);
+    
+    const typing = this.showTyping();
+    
+    // Simulate typing delay
+    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+    
+    this.hideTyping(typing);
+    
+    const response = this.getResponse(message);
+    this.addMessage(response);
+  }
+  
+  getResponse(message) {
+    const lowerMessage = message.toLowerCase();
+    
+    // Bus timing questions
+    if (lowerMessage.includes('bus') && (lowerMessage.includes('time') || lowerMessage.includes('timing'))) {
+      return "🚌 For bus timings, click on any bus stop marker on the map to see upcoming arrivals. The app shows real-time bus positions and estimated arrival times for each route.";
+    }
+    
+    // Location search help
+    if (lowerMessage.includes('search') || lowerMessage.includes('location') || lowerMessage.includes('address')) {
+      return "📍 To search for locations:\n• Type any address, landmark, or area name in the search boxes\n• Use 'Use My Location' button for current position\n• The app supports geocoding for most places in India\n• Try searching for: 'Majestic Bus Stand', 'Electronic City', etc.";
+    }
+    
+    // Map navigation
+    if (lowerMessage.includes('map') || lowerMessage.includes('navigate')) {
+      return "🗺️ Map features:\n• Click and drag to move around\n• Use +/- buttons or mouse wheel to zoom\n• Click bus stops for arrival times\n• Green buses show real-time positions\n• Click route for distance and time info";
+    }
+    
+    // Route planning
+    if (lowerMessage.includes('route') || lowerMessage.includes('plan') || lowerMessage.includes('directions')) {
+      return "🛣️ To plan a route:\n1. Enter your starting point in 'From' field\n2. Enter destination in 'To' field\n3. Click 'Plan Route' button\n4. View the route on the map with distance and time\n5. Click 'Navigate with Google Maps' for turn-by-turn directions";
+    }
+    
+    // App features
+    if (lowerMessage.includes('feature') || lowerMessage.includes('what can') || lowerMessage.includes('help')) {
+      return "✨ NextBus features:\n• Real-time bus tracking\n• Route planning and navigation\n• Bus stop information and timings\n• Multi-language support (8 Indian languages)\n• Dark/light theme options\n• Works offline for basic features\n• Covers major Indian cities";
+    }
+    
+    // Technical issues
+    if (lowerMessage.includes('not working') || lowerMessage.includes('error') || lowerMessage.includes('problem')) {
+      return "🔧 Troubleshooting tips:\n• Refresh the page if buses don't appear\n• Check your internet connection\n• Try clearing browser cache\n• Make sure location services are enabled\n• For production issues, check if the server is running";
+    }
+    
+    // Greeting responses
+    if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+      return "👋 Hello! I'm here to help you with NextBus. You can ask me about bus timings, route planning, location search, or any app features. What would you like to know?";
+    }
+    
+    // Default response
+    return "🤔 I'm not sure I understand that question. Try asking about:\n• Bus timings and routes\n• How to search for locations\n• Map navigation features\n• Route planning\n• App features and settings\n\nOr just say 'help' for more options!";
+  }
+}
+
+// Auto-initialize chatbot on pages that include this script
+document.addEventListener('DOMContentLoaded', () => {
+  // Only initialize if not on chatbot.html page
+  if (!window.location.pathname.includes('chatbot.html')) {
+    const chatbot = new ChatBot();
+    chatbot.init();
+  }
+});
