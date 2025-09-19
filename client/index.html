@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NextBus – Real‑Time Public Transport</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand"><a href="index.html" style="color:inherit;text-decoration:none"><img src="/favicon.svg" alt="NextBus" style="height:24px;vertical-align:middle;margin-right:8px">NextBus</a></div>
+      <nav class="nav">
+        <a href="index.html" data-i18n="home">Home</a>
+        <a href="features.html" data-i18n="features">Features</a>
+        <a href="download.html" data-i18n="download">Download</a>
+        <a href="contact.html" data-i18n="contact">Contact</a>
+        <a href="settings.html" data-i18n="settings">Settings</a>
+      </nav>
+      <button id="locate-me" class="btn primary">Use My Location</button>
+    </header>
+
+    <main class="layout">
+      <section class="controls">
+        <div class="control-group">
+          <label for="from" data-i18n="from">From</label>
+          <input id="from" placeholder="Current location or address" />
+          <div id="from-suggestions" class="suggestions"></div>
+        </div>
+        <div class="control-group">
+          <label for="to" data-i18n="destination">Destination</label>
+          <input id="to" placeholder="Where to?" />
+          <div id="to-suggestions" class="suggestions"></div>
+        </div>
+        <div class="actions">
+          <button id="route" type="button" class="btn primary" data-i18n="findRoute">Find Route</button>
+          <a href="timings.html" class="btn" data-i18n="timings">Bus Timings</a>
+          <a id="open-maps" target="_blank" rel="noopener" class="btn secondary" data-i18n="openInMaps">Open in Maps</a>
+          <button id="swap" class="btn" data-i18n="swap">Swap</button>
+        </div>
+        <div id="route-summary" class="route-summary"></div>
+      </section>
+
+      <section class="map-wrap">
+        <div id="map"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>© <span id="year"></span> NextBus. Built for small cities.</div>
+    </footer>
+
+    <script>
+      // Simple smarter chatbot widget
+      (function(){
+        const w = document.createElement('div');
+        w.style.position='fixed'; w.style.right='16px'; w.style.bottom='16px'; w.style.zIndex='1000';
+        w.innerHTML = '<button id="bot-toggle" class="btn secondary">Chat</button><div id="bot-box" style="display:none;margin-top:8px;background:#0e1726;border:1px solid #1f2a3a;border-radius:10px;width:300px;max-height:340px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.3)"><div id="bot-log" style="padding:10px;height:260px;overflow:auto;font-size:14px"></div><div style="display:flex;gap:6px;padding:8px;border-top:1px solid #1f2a3a"><input id="bot-input" placeholder="Ask about routes, buses..." style="flex:1;padding:8px;border-radius:8px;border:1px solid #243247;background:#0b1424;color:#e5efff"/><button id="bot-send" class="btn primary">Send</button></div></div>';
+        document.body.appendChild(w);
+        const toggle=document.getElementById('bot-toggle'); const box=document.getElementById('bot-box'); const log=document.getElementById('bot-log'); const input=document.getElementById('bot-input'); const send=document.getElementById('bot-send');
+        function reply(text){ const d=document.createElement('div'); d.style.margin='6px 0'; d.innerHTML = '<div style="color:#9fb3ca">'+text+'</div>'; log.appendChild(d); log.scrollTop=log.scrollHeight; }
+        function user(text){ const d=document.createElement('div'); d.style.margin='6px 0'; d.innerHTML = '<div style="text-align:right">'+text+'</div>'; log.appendChild(d); log.scrollTop=log.scrollHeight; }
+        function handle(q){
+          const s=q.toLowerCase();
+          if(/hello|hi|hey/.test(s)) return reply('Hi! You can ask me to find a route, show bus timings, or where the nearest stop is.');
+          if(/nearest stop|nearby stop|closest stop/.test(s)) return reply('Use the Use My Location button, then tap a stop on the map to see timings.');
+          if(/route|how to get|directions/.test(s)) return reply('Enter From and Destination, then press Find Route. The map page shows distance and nearby bus timings.');
+          if(/timing|eta|next bus/.test(s)) return reply('Tap any bus stop marker to see next arrivals by line.');
+          if(/language|translate|hindi|தமிழ்|తెలుగు|ಕನ್ನಡ/.test(s)) return reply('Open Settings to change language; all pages update instantly.');
+          return reply('I can help with: finding routes, bus timings, nearest stops, and settings.');
+        }
+        toggle.onclick=()=>{ box.style.display = box.style.display==='none' ? 'block' : 'none'; };
+        send.onclick=()=>{ const v=input.value.trim(); if(!v) return; user(v); handle(v); input.value=''; };
+        input.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ send.click(); }});
+      })();
+    </script>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script type="module" src="main.js"></script>
+  </body>
+  </html>
+
+
